@@ -4,5 +4,6 @@
 	{
 		void SaveUrl(string url, string shortenedUrl);
 		string GetUrlFor(string shortenedUrl);
+        void SaveOrUpdateUrl(string url, string shortenedUrl);
 	}
 }
