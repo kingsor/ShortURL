@@ -1,8 +1,8 @@
-﻿namespace ShortUrl
+﻿namespace ShortUrl.Modules
 {
     using DataAccess;
+    using Helpers;
     using Nancy;
-    using Nancy.Extensions;
     using Nancy.ModelBinding;
     using Nancy.Responses.Negotiation;
     using System;
@@ -17,7 +17,16 @@
             Get["/{shorturl}"] = param =>
             {
                 string shortUrl = param.shorturl;
-                return Response.AsRedirect(urlStore.GetUrlFor(shortUrl.ToString()));
+                string longUrl = urlStore.GetUrlFor(shortUrl.ToString());
+
+                if (String.IsNullOrEmpty(longUrl))
+                {
+                    return View["404.html"];
+                }
+                else
+                {
+                    return Response.AsRedirect(longUrl);
+                }
             };
         }
 
@@ -27,9 +36,9 @@
             if(longUrl == null)
             {
                 var newUrl = this.Bind<NewUrl>();
-                //longUrl = Request.Body.AsString();
                 longUrl = newUrl.Url;
             }
+
             var shortUrl = ShortenUrl(longUrl);
 
             if(urlStore.GetUrlFor(shortUrl) == null)

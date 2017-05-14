@@ -1,11 +1,13 @@
 ﻿namespace ShortUrlTest
 {
-	using Xunit;
-	using Nancy.Testing;
+    using Xunit;
+    using Nancy.Testing;
     using Moq;
     using ShortUrl;
+    using ShortUrl.DataAccess;
+    using ShortUrl.Modules;
 
-	public class UrlStorageTest
+    public class UrlStorageTest
 	{
 		private Browser app;
 		private Mock<UrlStore> fakeStorage;

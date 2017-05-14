@@ -11,12 +11,12 @@
     public class MongoUrlStore : UrlStore
     {
         private IMongoDatabase database;
-        private IMongoCollection<BsonDocument> urls;
+        private IMongoCollection<BsonDocument> webmarks;
 
         public MongoUrlStore(string connectionString)
         {
-            database = new MongoClient(connectionString).GetDatabase("webmarksdb");
-            urls = database.GetCollection<BsonDocument>("webmarks");
+            database = new MongoClient(connectionString).GetDatabase("appharbor_kgv42rz3");
+            webmarks = database.GetCollection<BsonDocument>("webmarks");
         }
 
         public void SaveUrl(string url, string shortenedUrl)
@@ -29,7 +29,17 @@
 
             newDoc = GetUrlDetails(newDoc);
 
-            urls.InsertOneAsync(newDoc, CancellationToken.None);
+            //urls.InsertOneAsync(newDoc, CancellationToken.None);
+            //urls.InsertOneAsync(newDoc);
+            try
+            {
+                webmarks.InsertOne(newDoc);
+            }
+            catch (Exception ex)
+            {
+                String message = ex.Message;
+                throw;
+            }
         }
 
         public void SaveOrUpdateUrl(string url, string shortenedUrl)
@@ -40,7 +50,7 @@
         public string GetUrlFor(string shortenedUrl)
         {
             var urlDocument =
-                urls
+                webmarks
                 .Find(Builders<BsonDocument>.Filter.Eq("short_url", shortenedUrl))
                 .FirstOrDefaultAsync()
                 .Result;
@@ -89,9 +99,12 @@
                     }
                 }
 
-                if(!String.IsNullOrEmpty(key) && !key.Equals("article:tag"))
+                if(!String.IsNullOrEmpty(key) /* && !key.Equals("article:tag")*/)
                 {
-                    if(metaDoc.Contains(key))
+
+                    key = key.Replace('.', ':');
+
+                    if (metaDoc.Contains(key))
                     {
                         metaDoc[key] = value;
                     }

@@ -1,4 +1,4 @@
-﻿namespace ShortUrl
+﻿namespace ShortUrl.DataAccess
 {
 	public interface UrlStore
 	{

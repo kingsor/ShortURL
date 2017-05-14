@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ShortUrl
+namespace ShortUrl.Helpers
 {
     //This is a partial C# implementation of hash algorithm by Fowler/Noll/Vo
     //http://www.isthe.com/chongo/tech/comp/fnv/index.html

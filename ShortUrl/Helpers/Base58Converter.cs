@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ShortUrl
+namespace ShortUrl.Helpers
 {
     /// <summary>
     /// Original post: [Tiny Url’s in C#](http://www.faygate.net/post/133462295/tinyurlcode)
