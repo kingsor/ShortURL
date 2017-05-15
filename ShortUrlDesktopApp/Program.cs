@@ -11,7 +11,8 @@
 
         public Program()
         {
-            var uri = new Uri($"{url}:{port}/");
+            
+            var uri = new Uri(String.Format("{0}:{1}/", url, port));
             nancy = new NancyHost(uri);
         }
 
