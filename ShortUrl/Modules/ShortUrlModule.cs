@@ -14,20 +14,37 @@
             Get["/"] = _ => View["index.html"];
             Post["/"] = _ => ShortenAndSaveUrl(urlStore);
             Post["/new"] = _ => ShortenAndSaveUrl(urlStore);
-            Get["/{shorturl}"] = param =>
-            {
-                string shortUrl = param.shorturl;
-                string longUrl = urlStore.GetUrlFor(shortUrl.ToString());
+            Get["/{shorturl}"] = parameters => GetLongUrl(parameters, urlStore);
 
-                if (String.IsNullOrEmpty(longUrl))
-                {
-                    return View["404.html"];
-                }
-                else
-                {
-                    return Response.AsRedirect(longUrl);
-                }
-            };
+            //Get["/{shorturl}"] = param =>
+            //{
+            //    string shortUrl = param.shorturl;
+            //    string longUrl = urlStore.GetUrlFor(shortUrl.ToString());
+
+            //    if (String.IsNullOrEmpty(longUrl))
+            //    {
+            //        return View["404.html"];
+            //    }
+            //    else
+            //    {
+            //        return Response.AsRedirect(longUrl);
+            //    }
+            //};
+        }
+
+        private  dynamic GetLongUrl(dynamic parameters, UrlStore urlStore)
+        {
+            string shortUrl = parameters.shorturl;
+            string longUrl = urlStore.GetUrlFor(shortUrl.ToString());
+
+            if (String.IsNullOrEmpty(longUrl))
+            {
+                return View["404.html"];
+            }
+            else
+            {
+                return Response.AsRedirect(longUrl);
+            }
         }
 
         private Negotiator ShortenAndSaveUrl(UrlStore urlStore)
@@ -46,14 +63,12 @@
                 urlStore.SaveUrl(longUrl, shortUrl);
             }
 
-            //return View["shortened_url", new { Request.Headers.Host, ShortUrl = shortUrl }];
             return Negotiate.WithModel(new { ShortUrl = ("http://" + Request.Headers.Host + "/" + shortUrl) });
         }
 
         private string ShortenUrl(string longUrl)
         {
             UInt32 hash = FNVHash.fnv_32a_str(longUrl);
-            //String base58Encoded = Base58Converter.Encode(hash);
             return Base58Converter.Encode(hash);
         }
     }

@@ -9,6 +9,9 @@
     using Nancy.Conventions;
     using System;
     using System.Configuration;
+    using Modules;
+    using System.IO;
+    using Nancy.Responses;
 
     public class Bootstrapper : DefaultNancyBootstrapper
     {
@@ -33,9 +36,29 @@
 
         protected override void ConfigureConventions(NancyConventions nancyConventions)
         {
-            base.ConfigureConventions(nancyConventions);
+            // this line works for console app but not for asp.net app
+            //nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/public", @"Content/public"));
 
-            Conventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/", @"Content"));
+            // this solution was found here: [https://groups.google.com/d/msg/nancy-web-framework/N3neO1FJ3Qc/NzooDTVSUFIJ]
+            // and it works for asp.net app and for console app
+            nancyConventions.StaticContentsConventions.Add((ctx, rootPath) =>
+            {
+                var path = ctx.Request.Url.Path;
+
+                const string resourcePath = "/public";
+
+                if (!path.StartsWith(resourcePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    return null;
+                }
+
+                return new EmbeddedFileResponse(
+                    this.GetType().Assembly,
+                    "ShortUrl.Content.public",
+                    Path.GetFileName(ctx.Request.Url.Path));
+            });
+
+            base.ConfigureConventions(nancyConventions);
         }
 
         protected override NancyInternalConfiguration InternalConfiguration
@@ -43,6 +66,7 @@
             get
             {
                 ResourceViewLocationProvider.RootNamespaces[Assembly.GetAssembly(this.GetType())] = "ShortUrl";
+
                 return NancyInternalConfiguration
                   .WithOverrides(x => x.ViewLocationProvider = typeof(ResourceViewLocationProvider));
             }

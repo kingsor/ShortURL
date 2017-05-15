@@ -15,7 +15,14 @@
 
         public MongoUrlStore(string connectionString)
         {
-            database = new MongoClient(connectionString).GetDatabase("appharbor_kgv42rz3");
+            var dbName = MongoUrl.Create(connectionString).DatabaseName;
+
+            if(String.IsNullOrEmpty(dbName))
+            {
+                dbName = "shorturl_db";
+            }
+
+            database = new MongoClient(connectionString).GetDatabase(dbName);
             webmarks = database.GetCollection<BsonDocument>("webmarks");
         }
 
@@ -29,8 +36,6 @@
 
             newDoc = GetUrlDetails(newDoc);
 
-            //urls.InsertOneAsync(newDoc, CancellationToken.None);
-            //urls.InsertOneAsync(newDoc);
             try
             {
                 webmarks.InsertOne(newDoc);
