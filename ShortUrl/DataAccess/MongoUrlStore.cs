@@ -22,8 +22,16 @@
                 dbName = "shorturl_db";
             }
 
-            database = new MongoClient(connectionString).GetDatabase(dbName);
-            webmarks = database.GetCollection<BsonDocument>("webmarks");
+            try
+            {
+                database = new MongoClient(connectionString).GetDatabase(dbName);
+                webmarks = database.GetCollection<BsonDocument>("webmarks");
+            }
+            catch(Exception ex)
+            {
+                String message = String.Format("Error connecting to mongodb: connectionString = {0} dbName = {1}", connectionString, dbName);
+                throw new Exception(message, ex);
+            }
         }
 
         public void SaveUrl(string url, string shortenedUrl)
