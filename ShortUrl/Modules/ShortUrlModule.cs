@@ -2,6 +2,7 @@
 {
     using DataAccess;
     using Helpers;
+    using MongoDB.Bson;
     using Nancy;
     using Nancy.ModelBinding;
     using Nancy.Responses.Negotiation;
@@ -12,30 +13,43 @@
         public ShortUrlModule(UrlStore urlStore)
         {
             Get["/"] = _ => View["index.html"];
+
             Post["/"] = _ => ShortenAndSaveUrl(urlStore);
+
             Post["/new"] = _ => ShortenAndSaveUrl(urlStore);
+
             Get["/{shorturl}"] = parameters => GetLongUrl(parameters, urlStore);
 
-            //Get["/{shorturl}"] = param =>
-            //{
-            //    string shortUrl = param.shorturl;
-            //    string longUrl = urlStore.GetUrlFor(shortUrl.ToString());
+            Get["/cleanup"] = _ => CleanupCollections(urlStore);
+        }
 
-            //    if (String.IsNullOrEmpty(longUrl))
-            //    {
-            //        return View["404.html"];
-            //    }
-            //    else
-            //    {
-            //        return Response.AsRedirect(longUrl);
-            //    }
-            //};
+        private dynamic CleanupCollections(UrlStore urlStore)
+        {
+            urlStore.ClearCollections();
+
+            return View["404.html"];
         }
 
         private  dynamic GetLongUrl(dynamic parameters, UrlStore urlStore)
         {
             string shortUrl = parameters.shorturl;
-            string longUrl = urlStore.GetUrlFor(shortUrl.ToString());
+
+            //Request.Headers.Referrer
+            //Request.Headers.UserAgent
+            //Request.UserHostAddress
+
+            var logRequest = new BsonDocument
+            {
+                {"shortUrl", shortUrl },
+                {"ipAddress", Request.UserHostAddress },
+                {"userAgent", Request.Headers.UserAgent},
+                {"referrer", Request.Headers.Referrer },
+                {"timestamp", DateTime.UtcNow },
+                {"statusCode", 200 }
+            };
+
+
+            string longUrl = urlStore.GetUrlForNav(shortUrl.ToString(), logRequest);
 
             if (String.IsNullOrEmpty(longUrl))
             {
