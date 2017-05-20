@@ -7,6 +7,8 @@
     using Nancy.ModelBinding;
     using Nancy.Responses.Negotiation;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     public class ShortUrlModule : NancyModule
     {
@@ -38,10 +40,37 @@
             //Request.Headers.UserAgent
             //Request.UserHostAddress
 
+            //*
+            var bsonHeaders = new BsonDocument();
+
+            foreach(String key in Request.Headers.Keys)
+            {
+                IEnumerable<string> values = Request.Headers[key];
+
+                int count = values.Count();
+
+                if(count == 1)
+                {
+                    bsonHeaders.Add(key, values.First());
+                }
+                else
+                {
+                    BsonArray bsonArray = new BsonArray(values);
+                    bsonHeaders.Add(key, bsonArray);
+                }
+            }
+
+            var bsonUrl = Request.Url.ToBsonDocument<Url>();
+            //*/
+
             var logRequest = new BsonDocument
             {
                 {"shortUrl", shortUrl },
-                {"ipAddress", Request.UserHostAddress },
+                {"host", Request.Headers.Host },
+                {"userHostAddress", Request.UserHostAddress },
+                {"headers", bsonHeaders },
+                {"url", bsonUrl },
+                // {"ipAddress", Request.UserHostAddress },
                 {"userAgent", Request.Headers.UserAgent},
                 {"referrer", Request.Headers.Referrer },
                 {"timestamp", DateTime.UtcNow },
