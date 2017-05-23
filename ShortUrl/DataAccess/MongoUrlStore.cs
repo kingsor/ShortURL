@@ -38,7 +38,7 @@
 
         public void ClearCollections()
         {
-            database.DropCollection("webmarks");
+            //database.DropCollection("webmarks");
             database.DropCollection("urlstats");
         }
 

@@ -36,10 +36,6 @@
         {
             string shortUrl = parameters.shorturl;
 
-            //Request.Headers.Referrer
-            //Request.Headers.UserAgent
-            //Request.UserHostAddress
-
             //*
             var bsonHeaders = new BsonDocument();
 
@@ -59,18 +55,13 @@
                     bsonHeaders.Add(key, bsonArray);
                 }
             }
-
-            var bsonUrl = Request.Url.ToBsonDocument<Url>();
             //*/
 
             var logRequest = new BsonDocument
             {
                 {"shortUrl", shortUrl },
-                {"host", Request.Headers.Host },
-                {"userHostAddress", Request.UserHostAddress },
+                {"userHostAddress", GetUserHostAddress() },
                 {"headers", bsonHeaders },
-                {"url", bsonUrl },
-                // {"ipAddress", Request.UserHostAddress },
                 {"userAgent", Request.Headers.UserAgent},
                 {"referrer", Request.Headers.Referrer },
                 {"timestamp", DateTime.UtcNow },
@@ -88,6 +79,34 @@
             {
                 return Response.AsRedirect(longUrl);
             }
+        }
+
+        private String GetUserHostAddress()
+        {
+            var userAddress = Request.Headers["X-Forwarded-For"].First();
+
+            if(String.IsNullOrEmpty(userAddress))
+            {
+                userAddress = Request.UserHostAddress;
+            }
+            else
+            {
+                //extract first IP
+                var index = userAddress.IndexOf(',');
+                if (index > 0)
+                {
+                    userAddress = userAddress.Substring(0, index);
+                }
+
+                //remove port
+                index = userAddress.IndexOf(':');
+                if (index > 0)
+                {
+                    userAddress = userAddress.Substring(0, index);
+                }
+            }
+
+            return userAddress;
         }
 
         private Negotiator ShortenAndSaveUrl(UrlStore urlStore)
