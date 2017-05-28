@@ -22,14 +22,31 @@
 
             Get["/{shorturl}"] = parameters => GetLongUrl(parameters, urlStore);
 
+            Get["/{shorturl}/stats"] = parameters => GetShortUrlStats(parameters, urlStore);
+
+            Get["/{shorturl}/content"] = parameters => GetShortUrlContent(parameters, urlStore);
+
             Get["/cleanup"] = _ => CleanupCollections(urlStore);
         }
+
 
         private dynamic CleanupCollections(UrlStore urlStore)
         {
             urlStore.ClearCollections();
 
             return View["404.html"];
+        }
+
+
+        private dynamic GetShortUrlStats(dynamic parameters, UrlStore urlStore)
+        {
+            return Negotiate.WithModel(new { Message = "Calling method GetShortUrlStats" });
+        }
+
+
+        private dynamic GetShortUrlContent(dynamic parameters, UrlStore urlStore)
+        {
+            return Negotiate.WithModel(new { Message = "Calling method GetShortUrlContent" });
         }
 
         private  dynamic GetLongUrl(dynamic parameters, UrlStore urlStore)
