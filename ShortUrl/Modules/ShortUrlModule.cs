@@ -100,7 +100,9 @@
 
         private String GetUserHostAddress()
         {
-            var userAddress = Request.Headers["X-Forwarded-For"].First();
+            // if run at localhost the .First() method throws an exception
+            // because locally there is no forwarding through proxy as in AppHarbor configuration
+            var userAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
 
             if(String.IsNullOrEmpty(userAddress))
             {
