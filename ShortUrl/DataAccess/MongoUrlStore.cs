@@ -7,6 +7,8 @@
     using NSoup.Nodes;
     using NSoup.Select;
     using System;
+    using ReadSharp;
+    using System.Threading.Tasks;
 
     public class MongoUrlStore : UrlStore
     {
@@ -42,7 +44,7 @@
             database.DropCollection("urlstats");
         }
 
-        public void SaveUrl(string url, string shortenedUrl)
+        public async void SaveUrl(string url, string shortenedUrl)
         {
             var newDoc = new BsonDocument
             {
@@ -50,6 +52,8 @@
                 { "shortUrl", shortenedUrl },
                 { "timestamp", DateTime.UtcNow }
             };
+
+            newDoc = await GetUrlContent(newDoc);
 
             newDoc = GetUrlDetails(newDoc);
 
@@ -104,14 +108,52 @@
             return urlDocument;
         }
 
+        private async Task<BsonDocument> GetUrlContent(BsonDocument newDoc)
+        {
+            String url = newDoc["url"].AsString;
+            String rawContent = String.Empty;
+
+            Reader reader = new Reader();
+            Article article;
+
+            try
+            {
+                Task<Article> readArticle = reader.Read(new Uri(url));
+
+                article = await readArticle;
+
+                rawContent = article.Raw;
+
+                newDoc.Add("rawContent", rawContent);
+
+                BsonDocument docArticle = article.ToBsonDocument();
+
+                newDoc.Add("content", docArticle);
+            }
+            catch (ReadException ex)
+            {
+                newDoc.Add("readError", ex.Message);
+            }
+
+            return newDoc;
+        }
+
         private BsonDocument GetUrlDetails(BsonDocument newDoc)
         {
-            string url = newDoc["url"].AsString;
+            Document doc = null;
 
-            IConnection conn = NSoupClient.Connect(url);
-            conn.UserAgent("Mozilla");
-
-            Document doc = conn.Get();
+            if (newDoc.Contains("readError"))
+            {
+                String url = newDoc["url"].AsString;
+                IConnection conn = NSoupClient.Connect(url);
+                conn.UserAgent("Mozilla");
+                doc = conn.Get();
+            }
+            else
+            {
+                String rawContent = newDoc["rawContent"].AsString;
+                doc = NSoupClient.Parse(rawContent);
+            }
 
             newDoc.Add("title", doc.Title);
 
