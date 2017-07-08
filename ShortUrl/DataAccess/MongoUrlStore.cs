@@ -120,6 +120,8 @@
             {
                 Task<Article> readArticle = reader.Read(new Uri(url));
 
+                // here there was a deadlock that I solved thanks to this link
+                // https://stackoverflow.com/questions/8438786/calling-an-async-method-from-a-non-async-method
                 article = await readArticle;
 
                 rawContent = article.Raw;
