@@ -44,7 +44,7 @@
             database.DropCollection("urlstats");
         }
 
-        public async void SaveUrl(string url, string shortenedUrl)
+        public void SaveUrl(string url, string shortenedUrl)
         {
             var newDoc = new BsonDocument
             {
@@ -53,7 +53,7 @@
                 { "timestamp", DateTime.UtcNow }
             };
 
-            newDoc = await GetUrlContent(newDoc);
+            newDoc = GetUrlContent(newDoc);
 
             newDoc = GetUrlDetails(newDoc);
 
@@ -108,7 +108,7 @@
             return urlDocument;
         }
 
-        private async Task<BsonDocument> GetUrlContent(BsonDocument newDoc)
+        private BsonDocument GetUrlContent(BsonDocument newDoc)
         {
             String url = newDoc["url"].AsString;
             String rawContent = String.Empty;
@@ -118,11 +118,7 @@
 
             try
             {
-                Task<Article> readArticle = reader.Read(new Uri(url));
-
-                // here there was a deadlock that I solved thanks to this link
-                // https://stackoverflow.com/questions/8438786/calling-an-async-method-from-a-non-async-method
-                article = await readArticle;
+                article = Task.Run(() => reader.Read(new Uri(url))).GetAwaiter().GetResult();
 
                 rawContent = article.Raw;
 
@@ -132,7 +128,11 @@
 
                 newDoc.Add("content", docArticle);
             }
-            catch (ReadException ex)
+            //catch (ReadException ex)
+            //{
+            //    newDoc.Add("readError", ex.Message);
+            //}
+            catch(Exception ex)
             {
                 newDoc.Add("readError", ex.Message);
             }
@@ -207,6 +207,63 @@
 
             return newDoc;
         }
-        
+
+        private async Task<BsonDocument> GetUrlContentAsync(BsonDocument newDoc)
+        {
+            String url = newDoc["url"].AsString;
+            String rawContent = String.Empty;
+
+            Reader reader = new Reader();
+            Article article;
+
+            try
+            {
+                // here there was a deadlock that I solved thanks to this link
+                // https://stackoverflow.com/questions/8438786/calling-an-async-method-from-a-non-async-method
+
+                //Task<Article> readArticle = reader.Read(new Uri(url));
+                //article = await readArticle;
+                article = await reader.Read(new Uri(url));
+
+                rawContent = article.Raw;
+
+                newDoc.Add("rawContent", rawContent);
+
+                BsonDocument docArticle = article.ToBsonDocument();
+
+                newDoc.Add("content", docArticle);
+            }
+            catch (ReadException ex)
+            {
+                newDoc.Add("readError", ex.Message);
+            }
+
+            return newDoc;
+        }
+
+        public void SaveUrlAsync(string url, string shortenedUrl)
+        {
+            var newDoc = new BsonDocument
+            {
+                { "url", url },
+                { "shortUrl", shortenedUrl },
+                { "timestamp", DateTime.UtcNow }
+            };
+
+            newDoc = GetUrlContentAsync(newDoc).Result;
+
+            newDoc = GetUrlDetails(newDoc);
+
+            try
+            {
+                webmarks.InsertOne(newDoc);
+            }
+            catch (Exception ex)
+            {
+                String message = ex.Message;
+                throw;
+            }
+        }
+
     }
 }

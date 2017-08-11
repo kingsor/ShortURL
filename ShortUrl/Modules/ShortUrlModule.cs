@@ -2,6 +2,7 @@
 {
     using DataAccess;
     using Helpers;
+    using Model;
     using MongoDB.Bson;
     using Nancy;
     using Nancy.ModelBinding;
@@ -20,6 +21,8 @@
 
             Post["/new"] = _ => ShortenAndSaveUrl(urlStore);
 
+            Post["/test"] = parameters => TestMethod(parameters);
+
             Get["/{shorturl}"] = parameters => GetLongUrl(parameters, urlStore);
 
             Get["/{shorturl}/stats"] = parameters => GetShortUrlStats(parameters, urlStore);
@@ -29,6 +32,12 @@
             Get["/cleanup"] = _ => CleanupCollections(urlStore);
         }
 
+        private dynamic TestMethod(dynamic parameters)
+        {
+            var newUrl = this.Bind<NewUrl>();
+
+            return Negotiate.WithModel(new { Input = newUrl });
+        }
 
         private dynamic CleanupCollections(UrlStore urlStore)
         {
@@ -135,6 +144,11 @@
             {
                 var newUrl = this.Bind<NewUrl>();
                 longUrl = newUrl.Url;
+            }
+
+            if(longUrl == null)
+            {
+                return Negotiate.WithModel(new { Message = "Url parameter is null" });
             }
 
             var shortUrl = ShortenUrl(longUrl);

@@ -18,7 +18,7 @@ function displayShortenedUrl(response) {
 // Callback function passed to Axios' error handler
 function alertError(error) {
     // Handle server or validation errors
-    alert('Are you sure the URL is correct? Make sure it has http:// at the beginning.');
+    alert('Are you sure the URL is correct? Make sure it has http:// at the beginning.\n' + error);
 } // End of function to display errors on the page
 
 form.addEventListener('submit', function (event) {

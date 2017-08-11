@@ -96,10 +96,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\UrlToSave.cs" />
     <Compile Include="Helpers\Base58Converter.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="DataAccess\MongoUrlStore.cs" />
-    <Compile Include="DataAccess\NewUrl.cs" />
+    <Compile Include="Model\NewUrl.cs" />
     <Compile Include="Helpers\FNVHash.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Modules\ShortUrlModule.cs" />
