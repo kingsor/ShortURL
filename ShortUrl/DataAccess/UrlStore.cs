@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ShortUrl.DataAccess
@@ -9,6 +10,7 @@ namespace ShortUrl.DataAccess
         void SaveUrlAsync(string url, string shortenedUrl);
         string GetUrlForNav(string shortenedUrl, BsonDocument logRequest);
         string GetUrlFor(string shortenedUrl);
+        List<BsonDocument> GetStatsFor(string shortenedUrl);
         void SaveOrUpdateUrl(string url, string shortenedUrl);
         void ClearCollections();
 	}

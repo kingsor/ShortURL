@@ -9,6 +9,7 @@
     using System;
     using ReadSharp;
     using System.Threading.Tasks;
+    using System.Collections.Generic;
 
     public class MongoUrlStore : UrlStore
     {
@@ -84,6 +85,14 @@
             return
                 urlDocument == null ?
                 null : urlDocument["url"].AsString;
+        }
+
+        public List<BsonDocument> GetStatsFor(string shortenedUrl)
+        {
+            var filter = Builders<BsonDocument>.Filter.Eq("shortUrl", shortenedUrl);
+            var result = urlstats.Find(filter).ToListAsync().Result;
+
+            return result;
         }
 
         public string GetUrlForNav(string shortenedUrl, BsonDocument logRequest)

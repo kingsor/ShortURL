@@ -49,7 +49,13 @@
 
         private dynamic GetShortUrlStats(dynamic parameters, UrlStore urlStore)
         {
-            return Negotiate.WithModel(new { Message = "Calling method GetShortUrlStats" });
+            string shortUrl = parameters.shorturl;
+
+            dynamic result = urlStore.GetStatsFor(shortUrl);
+
+            //return Negotiate.WithModel(new { Message = "Calling method GetShortUrlStats" });
+            //return Negotiate.WithModel(result);
+            return result;
         }
 
 
