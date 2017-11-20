@@ -10,6 +10,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
 
     public class ShortUrlModule : NancyModule
     {
@@ -25,11 +26,27 @@
 
             Get["/{shorturl}"] = parameters => GetLongUrl(parameters, urlStore);
 
+            Get["/items"] = parameters => GetSavedItems(urlStore);
+
             Get["/{shorturl}/stats"] = parameters => GetShortUrlStats(parameters, urlStore);
 
             Get["/{shorturl}/content"] = parameters => GetShortUrlContent(parameters, urlStore);
 
             Get["/cleanup"] = _ => CleanupCollections(urlStore);
+        }
+
+        private dynamic GetSavedItems(UrlStore urlStore)
+        {
+            var items = urlStore.GetSavedItems();
+
+            var json = items.ToJson();
+
+            var jsonBytes = Encoding.UTF8.GetBytes(json);
+            return new Response
+            {
+                ContentType = "application/json",
+                Contents = s => s.Write(jsonBytes, 0, jsonBytes.Length)
+            };
         }
 
         private dynamic TestMethod(dynamic parameters)
@@ -51,11 +68,18 @@
         {
             string shortUrl = parameters.shorturl;
 
-            dynamic result = urlStore.GetStatsFor(shortUrl);
+            var stats = urlStore.GetStatsFor(shortUrl);
 
-            //return Negotiate.WithModel(new { Message = "Calling method GetShortUrlStats" });
+            var json = stats.ToJson();
+
             //return Negotiate.WithModel(result);
-            return result;
+
+            var jsonBytes = Encoding.UTF8.GetBytes(json);
+            return new Response
+            {
+                ContentType = "application/json",
+                Contents = s => s.Write(jsonBytes, 0, jsonBytes.Length)
+            };
         }
 
 

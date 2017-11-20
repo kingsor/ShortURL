@@ -74,6 +74,21 @@
             throw new NotImplementedException();
         }
 
+        public List<BsonDocument> GetSavedItems()
+        {
+
+            var result = webmarks.Find(new BsonDocument())
+                .Project(Builders<BsonDocument>.Projection
+                    .Include("url")
+                    .Include("shortUrl")
+                    .Include("title")
+                    .Include("timestamp")
+                    .Exclude("_id"))
+                .ToListAsync().Result;
+
+            return result;
+        }
+
         public string GetUrlFor(string shortenedUrl)
         {
             var urlDocument =
