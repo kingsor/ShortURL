@@ -78,11 +78,29 @@
         {
 
             var result = webmarks.Find(new BsonDocument())
+                .Sort(Builders<BsonDocument>.Sort.Descending("timestamp"))
                 .Project(Builders<BsonDocument>.Projection
                     .Include("url")
                     .Include("shortUrl")
                     .Include("title")
                     .Include("timestamp")
+                    .Exclude("_id"))
+                .ToListAsync().Result;
+
+            return result;
+        }
+
+        public List<BsonDocument> GetAllStats()
+        {
+            var result = urlstats.Find(new BsonDocument())
+                .Sort(Builders<BsonDocument>.Sort.Descending("timestamp"))
+                .Project(Builders<BsonDocument>.Projection
+                    .Include("shortUrl")
+                    .Include("userHostAddress")
+                    .Include("userAgent")
+                    .Include("referrer")
+                    .Include("timestamp")
+                    .Include("statusCode")
                     .Exclude("_id"))
                 .ToListAsync().Result;
 
@@ -105,7 +123,17 @@
         public List<BsonDocument> GetStatsFor(string shortenedUrl)
         {
             var filter = Builders<BsonDocument>.Filter.Eq("shortUrl", shortenedUrl);
-            var result = urlstats.Find(filter).ToListAsync().Result;
+            var result = urlstats.Find(filter)
+                .Sort(Builders<BsonDocument>.Sort.Descending("timestamp"))
+                .Project(Builders<BsonDocument>.Projection
+                    .Include("shortUrl")
+                    .Include("userHostAddress")
+                    .Include("userAgent")
+                    .Include("referrer")
+                    .Include("timestamp")
+                    .Include("statusCode")
+                    .Exclude("_id"))
+                .ToListAsync().Result;
 
             return result;
         }

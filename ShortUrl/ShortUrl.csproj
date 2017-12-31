@@ -102,6 +102,7 @@
     <Compile Include="DataAccess\MongoUrlStore.cs" />
     <Compile Include="Model\NewUrl.cs" />
     <Compile Include="Helpers\FNVHash.cs" />
+    <Compile Include="Modules\ApiModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Modules\ShortUrlModule.cs" />
     <Compile Include="DataAccess\UrlStore.cs" />

@@ -28,11 +28,26 @@
 
             Get["/items"] = parameters => GetSavedItems(urlStore);
 
+            Get["/stats"] = parameters => GetAllStats(urlStore);
+
             Get["/{shorturl}/stats"] = parameters => GetShortUrlStats(parameters, urlStore);
 
             Get["/{shorturl}/content"] = parameters => GetShortUrlContent(parameters, urlStore);
 
             Get["/cleanup"] = _ => CleanupCollections(urlStore);
+        }
+
+        private dynamic GetAllStats(UrlStore urlStore)
+        {
+            var stats = urlStore.GetAllStats();
+
+            var jsonBytes = Encoding.UTF8.GetBytes(stats.ToJson());
+
+            return new Response
+            {
+                ContentType = "application/json",
+                Contents = s => s.Write(jsonBytes, 0, jsonBytes.Length)
+            };
         }
 
         private dynamic GetSavedItems(UrlStore urlStore)

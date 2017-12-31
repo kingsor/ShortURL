@@ -12,6 +12,7 @@ namespace ShortUrl.DataAccess
         string GetUrlFor(string shortenedUrl);
         List<BsonDocument> GetStatsFor(string shortenedUrl);
         List<BsonDocument> GetSavedItems();
+        List<BsonDocument> GetAllStats();
         void SaveOrUpdateUrl(string url, string shortenedUrl);
         void ClearCollections();
 	}
